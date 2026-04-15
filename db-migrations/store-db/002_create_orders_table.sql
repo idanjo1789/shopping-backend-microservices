@@ -1,0 +1,17 @@
+USE store_db;
+CREATE TABLE IF NOT EXISTS orders (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id BIGINT UNSIGNED NOT NULL,
+  status ENUM('TEMP','CLOSE') NOT NULL DEFAULT 'TEMP',
+  total_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+ 
+  temp_flag TINYINT AS (CASE WHEN status = 'TEMP' THEN 1 ELSE 0 END) STORED,
+
+  PRIMARY KEY (id),
+  KEY idx_orders_user_id (user_id),
+  KEY idx_orders_status (status),
+  UNIQUE KEY uq_orders_one_temp_per_user (user_id, temp_flag)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

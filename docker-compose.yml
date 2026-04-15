@@ -1,0 +1,111 @@
+version: "3.9"
+
+services:
+
+  mysql-user:
+    image: mysql:8.0
+    container_name: mysql-user
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: user_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - user_db_data:/var/lib/mysql
+    networks:
+      - shopping-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mysql-store:
+    image: mysql:8.0
+    container_name: mysql-store
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: store_db
+    ports:
+      - "3308:3306"
+    volumes:
+      - store_db_data:/var/lib/mysql
+    networks:
+      - shopping-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    restart: always
+    depends_on:
+      mysql-user:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql-user
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: user_db
+      SECRET_KEY: idan-josifov
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+    ports:
+      - "8001:8001"
+    networks:
+      - shopping-network
+
+  store-service:
+    build: ./store-service
+    container_name: store-service
+    restart: always
+    depends_on:
+      mysql-store:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+    environment:
+      DB_HOST: mysql-store
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: store_db
+      USER_SERVICE_BASE_URL: http://user-service:8001
+      SECRET_KEY: idan-josifov
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    ports:
+      - "8002:8002"
+    networks:
+      - shopping-network
+
+  streamlit-app:
+    build: ./streamlit-app
+    container_name: streamlit-app
+    restart: always
+    depends_on:
+      - user-service
+      - store-service
+    environment:
+      USER_SERVICE_BASE_URL: http://user-service:8001
+      STORE_SERVICE_BASE_URL: http://store-service:8002
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    ports:
+      - "8501:8501"
+    networks:
+      - shopping-network
+
+networks:
+  shopping-network:
+    driver: bridge
+
+volumes:
+  user_db_data:
+  store_db_data:
