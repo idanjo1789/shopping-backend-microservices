@@ -6,7 +6,7 @@ Microservices-based eCommerce platform built with FastAPI, MySQL, Docker, and St
 
 ## Project Overview
 
-This project is a full end-to-end microservices-based shopping platform with AI capabilities.
+This project is a full end-to-end microservices-based shopping platform.
 
 It was built as a final project with emphasis on:
 - backend architecture
@@ -15,7 +15,7 @@ It was built as a final project with emphasis on:
 - stock handling
 - order lifecycle
 - favorite items
-- AI-powered chat assistant
+- chat assistant integration
 
 The UI is implemented with Streamlit, while the backend is built with FastAPI and MySQL, all running with Docker.
 
@@ -42,7 +42,7 @@ Responsible for:
 - order management
 - stock validation
 - stock updates after purchase
-- AI chat assistant integration
+- chat assistant integration
 
 ### 3. Streamlit Frontend
 Responsible for:
@@ -84,10 +84,9 @@ The main page of the system is the **Shop** page.
 
 It includes:
 - product search
-- products data frame
 - products grid
 - product images
-- price in USD
+- price display
 - stock display
 - product descriptions
 
@@ -118,17 +117,6 @@ Users can:
 - view account details
 - delete their account
 
-Each user includes:
-- user ID
-- username
-- first name
-- last name
-- email
-- phone
-- country
-- city
-- hashed password
-
 Passwords are stored encrypted and never in plain text.
 
 ---
@@ -144,8 +132,6 @@ Rules:
 - favorites are saved in the database
 - favorites remain after logout/login
 - only logged-in users can use favorites
-
-The shop page also indicates whether an item is already in favorites.
 
 ---
 
@@ -179,14 +165,13 @@ Rules:
 
 ---
 
-### AI Chat Assistant
+### Chat Assistant
 The system includes a chat assistant for store products.
 
 Features:
 - answers questions about products in the store
-- knows products that are in stock
-- knows products that are out of stock
 - uses store catalog data before generating responses
+- limited number of prompts per session
 
 ---
 
@@ -197,8 +182,10 @@ shopping-backend-microservices/
 │
 ├── docker-compose.yml
 ├── README.md
+├── .env
 │
 ├── user-service/
+│   ├── .env
 │   ├── Dockerfile
 │   ├── requirements.txt
 │   └── app/
@@ -212,6 +199,7 @@ shopping-backend-microservices/
 │       └── resources/db-migrations/
 │
 ├── store-service/
+│   ├── .env
 │   ├── Dockerfile
 │   ├── requirements.txt
 │   └── app/
@@ -226,6 +214,7 @@ shopping-backend-microservices/
 │       └── resources/db-migrations/
 │
 └── streamlit-app/
+    ├── .env
     ├── Dockerfile
     ├── requirements.txt
     ├── app.py
